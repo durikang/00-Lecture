@@ -1,109 +1,157 @@
-ï»¿#include <iostream>
-#include <time.h>
-#include <random>
-#include <numeric>
-#include <array>
+#include "iostream"
+#include "time.h"
+#include "random"
+#include "array"
+#include "numeric"
+#include <conio.h>
+
 
 using namespace std;
 
-array<int, 9> randomNumber() {
-	array<int,9> number; //1~9 ëœë¤ìˆ«ì
-	int tmp;
-	int idx1;
-	int idx2;
-	iota(number.begin(), number.end(), 1);
-
-	srand((unsigned int)time(0));
-
-	
-	for (int i = 0; i < 100; i++) {
-		idx1 = rand() % 9;
-		idx2 = rand() % 9;
-		tmp = number.at(idx1);
-		number.at(idx1) = number.at(idx2);
-		number.at(idx2) = tmp;
-	}
-
-	return number;
-}
+namespace dr {
+	class NumberGame {
+		array<int, 25> res;
+		int initStartArea= 24;
 
 
 
-int main()
-{
-	array<int,3> n;
-	array<int,3> vari; //ëœë¤í•˜ê²Œ ì„ì€ ìˆ«ìë“¤ì¤‘ 3ê°€ì§€
-	int v=0;
-	int strike=0;
-	int ball = 0;
-	int cnt = 1;
+	public:
+		NumberGame(){
+			iota(res.begin(), res.end() - 1, 1);
+			srand((unsigned int)time(0));
+			res.at(24) = INT_MAX;
 
-	bool exit = false;
-
-	
-	//ì„ì€ ê°’ì„ variì— push
-	for (int i = 0; i < 3; i++) {
-		vari[i] = randomNumber().at(i);
-	}
-
-	cout << "\n";
-	while (true) {
-
-		cout << "===================ì‹œì‘=============================\n";
-		cout << "íšŒì°¨ : " << cnt <<"\n";
-		
-		cout << "ê³µ ì„¸ê°œë¥¼ ë˜ì ¸ì£¼ì„¸ìš”.\n";
-		cout << "ì…ë ¥ê°’ : ";
-		for (int i = 0; i < 3; i++)
-		{
-			cin >> v;
-			n[i]=v;
 		}
-		cout << "\n";
-		cout << "=====ê²½ê³„ì„ ====\n";
-
-		for (int i = 0; i < 3; i++) {
-			if (n[i] < 1 || n[i]>9) {
-				exit = true;
+		void shuffleNumber() {
+			int tmp;
+			int idx1;
+			int idx2;
+			for (int i = 0; i < 100; i++) {
+				idx1 = rand() % 24;
+				idx2 = rand() % 24;
+				tmp = res.at(idx1);
+				res.at(idx1) = res.at(idx2);
+				res.at(idx2) = tmp;
 			}
 		}
-		if (exit == true) {
-			cout << "1~9ì´ì™¸ì˜ ìˆ«ìë¥¼ ì…ë ¥ì‹œ ì¢…ë£Œí•©ë‹ˆë‹¤.\n";
-			break;
-		}
 
+		bool ParityErrorCheck() {
+			auto Inversion = 0;
+			bool Solved = true;
 
-
-
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				if (vari[i] == n[j]) {
-					if (i == j) {
-						strike++;
-					}
-					else {
-						ball++;
+			while (Solved) {
+				for (int i = 0; i < 25; i++) {
+					for (int j = i; j < 25; j++) {
+						if ((res.at(i) > res.at(j)) && res.at(i) != INT_MAX) {
+							Inversion++;
+						}
 					}
 				}
+				if (Inversion % 2 == 0) {
+					Solved = false;
+					Inversion = 0;
+				}
+				else {
+					Inversion = 0;
+					shuffleNumber();
+				}
+			}
+
+			return Solved;
+
+		}
+
+		void keyboard(char cinput) {
+			switch (cinput) {
+			case 'w':
+			case 'W':
+				if (initStartArea > 4) {
+					// °¡Àå À­ÁÙÀÏ ¶§´Â w¸¦ ´­·¶À»¶§ µ¿ÀÛ x
+					res.at(initStartArea) = res.at(initStartArea - 5);
+					res.at(initStartArea - 5) = INT_MAX;
+					initStartArea -= 5;
+				}
+				break;
+			case 's':
+			case 'S':
+				if (initStartArea <= 19) {
+					// °¡Àå À­ÁÙÀÏ ¶§´Â w¸¦ ´­·¶À»¶§ µ¿ÀÛ x
+					res.at(initStartArea) = res.at(initStartArea + 5);
+					res.at(initStartArea + 5) = INT_MAX;
+					initStartArea += 5;
+				}
+				break;
+			case 'a':
+			case 'A':
+				if (initStartArea % 5 != 0) {
+					// °¡Àå À­ÁÙÀÏ ¶§´Â w¸¦ ´­·¶À»¶§ µ¿ÀÛ x
+					res.at(initStartArea) = res.at(initStartArea - 1);
+					res.at(initStartArea - 1) = INT_MAX;
+					initStartArea -= 1;
+				}
+				break;
+			case 'd':
+			case 'D':
+				if (initStartArea % 5 != 4) {
+					// °¡Àå À­ÁÙÀÏ ¶§´Â w¸¦ ´­·¶À»¶§ µ¿ÀÛ x
+					res.at(initStartArea) = res.at(initStartArea + 1);
+					res.at(initStartArea + 1) = INT_MAX;
+					initStartArea += 1;
+				}
+				break;
+			}
+			if (cinput == 'q' || cinput == 'Q') {
+				cout << "Á¾·á\n";
+				exit(0);
+			}
+		}
+		void draw() {
+			for (int i = 0; i < 5; i++) {
+				for (int j = 0; j < 5; j++) {
+					if (res.at(i * 5 + j) == INT_MAX) 
+						cout << "*\t";
+					else 
+						cout << res.at(i * 5 + j) << "\t";
+
+				}cout << "\n";
 			}
 		}
 
-		cout <<"íšŒì°¨ : "<<cnt<< "íšŒ\n";
-		cout <<"ê²°ê³¼-> \tìŠ¤íŠ¸ë¼ì´í¬ : " << strike << "\t ë³¼ : " << ball << "\n";
-		cnt++;
-		if (strike == 3) {
-			copy(vari.begin(), vari.end(), ostream_iterator<int>(cout,", "));
-			cout << "\n";
-			cout << "3ì§„ì•„ì›ƒ";
+		bool gameWin() {
+			for (int i = 0; i < 24; i++) {
+				if (res[i] != i + 1) {
+					return false;
+					break;
+				}
+			}
+			return true;
+		}
+
+
+	};
+}
+
+int main() {
+	dr::NumberGame game;
+	bool Inversion = true;
+	game.shuffleNumber();
+	bool over = false;
+
+	while (true) {
+		system("cls");
+
+		while (Inversion) {
+			Inversion=game.ParityErrorCheck();
+		}
+		game.draw();
+		cout << "w : À§\ts: ¾Æ·¡\ta : ¿ŞÂÊ\td : ¿À¸¥ÂÊ\tq : Á¾·á \n";
+		over = game.gameWin();
+
+		if (over)
 			break;
-		}
-		else {
-			cout << "3ì§„ì•„ì›ƒ ì¡ìœ¼ì…”ì•¼ ê²Œì„ì´ ëë‚©ë‹ˆë‹¤. ë‹¤ì‹œ ë˜ì ¸ì£¼ì„¸ìš”\n\n\n";
-			strike = 0;
-			ball = 0;
-		}
+		char cinput = _getch();
+		game.keyboard(cinput); ///³»ÀÏ ¿©±â Å×½ºÆ® ÇØº¸¾ßÇÔ
+
 	}
-
-
-
+	cout << "¼ıÀÚ¸¦ ¸ğµÎ Á¤·Ä ÇÏ¿´½À´Ï´Ù. ÃßÄ«ÇÕ´Ï´Ù.\n";
 }
